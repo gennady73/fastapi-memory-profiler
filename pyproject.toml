@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fastapi-memory-profiler"
-version = "0.1.0"
+version = "0.1.0a1"
 description = "A drop-in FastAPI router for real-time memory leak profiling."
 readme = "README.md"
 requires-python = ">=3.8"
