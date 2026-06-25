@@ -69,6 +69,37 @@ Once your FastAPI server is running, the following profiling routes are exposed:
 | /debug/memory/objgraph/{obj_type}  | Generates and downloads a .png reference graph for the requested object type (e.g., /objgraph/KeycloakUser). |
 | /debug/memory/clear-tracemalloc | Resets the tracemalloc baseline to zero.                                                                     |
 
+
+## Features
+### Historical Memory Tracking (Time-Series)
+
+Standard profilers only show you a point-in-time snapshot, making it difficult to differentiate between healthy Python Garbage Collection sweeps and a slow, creeping memory leak. 
+
+To solve this, the profiler automatically spins up a lightweight, daemonized background thread upon import. 
+* **3-Day Rolling Window:** It silently polls your OS RSS memory every 60 seconds and stores it in a bounded `deque` (maximum 4,320 data points). 
+* **Zero-Leak Guarantee:** Because the queue is strictly bounded, the historical tracker will never cause a memory leak itself.
+* **Interactive Visualization:** The `/dashboard/html` route renders this history using `Chart.js`. Even if you leave the dashboard closed all weekend, opening it on Monday will instantly draw the full 72-hour memory curve.
+
+### Live Trend Indicators (Deltas)
+
+The dashboard includes stateful momentum tracking to help you spot anomalous allocations out of the corner of your eye. Every time the dashboard refreshes, it compares the current snapshot against the previous one:
+
+* 🔺 **Red Up Arrow:** The count or size has increased since the last refresh. (Useful for spotting active hoarding during load testing).
+* 🔻 **Green Down Arrow:** The count has decreased. (Validates that Garbage Collection is successfully sweeping your objects).
+* **No Arrow:** The metric is perfectly stable.
+
+These indicators are applied automatically to **Active OS Threads**, **ThreadPoolExecutor Threads**, **'Future' Objects**, and every individual object type tracked in the **Objects In Memory Heap** table.
+
+### System Vitals Grid
+
+To provide context to your memory footprint, the dashboard features a top-level vitals grid that displays:
+* **Process Memory (RSS):** What your specific container/process is using.
+* **Total Host RAM:** The maximum hardware limit of the machine.
+* **Available CPU Cores:** Useful for understanding ThreadPool capacity.
+* **Application Uptime:** Correlates directly with the time-series chart to prove long-term stability.
+
+![Dashboard Screenshot](assets/dashboard.png)
+
 ## How to Read the Data (The Golden Rules)     
 Finding a memory leak requires cross-referencing the Top Allocations table with the Objects in Memory table.
 

@@ -67,3 +67,8 @@ memory_stats_chart.png
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# =========================
+# Build script
+# =========================
+build.sh

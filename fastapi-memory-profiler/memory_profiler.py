@@ -9,6 +9,7 @@ from fastapi import FastAPI, APIRouter
 from fastapi.responses import FileResponse
 from fastapi.responses import HTMLResponse
 import html
+import gc
 
 
 # Start tracemalloc upon import so it begins tracking immediately
@@ -75,9 +76,14 @@ def generate_object_graph_dynamic(obj_type: str):
 
 @memory_router.get("/clear-tracemalloc")
 def clear_tracemalloc_stats():
-    """Clears tracemalloc memory to reset the baseline."""
+    """Forces garbage collection, then clears tracemalloc memory to reset the baseline."""
+    # 1. Sweep away any unreferenced dead objects first
+    gc.collect()
+
+    # 2. Reset the tracking baseline to zero
     tracemalloc.clear_traces()
-    return {"status": "Tracemalloc baseline reset."}
+
+    return {"status": "Garbage collected and Tracemalloc baseline reset."}
 
 
 @memory_router.get("/dashboard/html", response_class=HTMLResponse)
