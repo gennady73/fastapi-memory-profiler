@@ -20,3 +20,5 @@ dependencies = [
     "graphviz>=0.20.1"
 ]
 
+[tool.setuptools.package-data]
+"*" = ["static/*.js"]
